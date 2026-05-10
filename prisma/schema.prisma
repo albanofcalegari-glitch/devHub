@@ -1,0 +1,346 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  name     String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  projects     Project[]
+  devModules   DevModule[]
+  ideas        ProjectIdea[]
+  clients      Client[]
+  paymentPlans PaymentPlan[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  slug        String        @unique
+  description String
+  status      ProjectStatus @default(PLANNING)
+  progress    Int           @default(0)
+  color       String        @default("#7c5cfc")
+  icon        String        @default("folder")
+  stack       Json          @default("[]")
+
+  repoUrl      String? @map("repo_url")
+  prodUrl      String? @map("prod_url")
+  devUrl       String? @map("dev_url")
+  stagingUrl   String? @map("staging_url")
+  brief        String? @db.Text
+  architecture String? @db.Text
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  credentials  ProjectCredential[]
+  tasks        ProjectTask[]
+  notes        ProjectNote[]
+  clients      ClientProject[]
+  paymentPlans PaymentPlan[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  IN_DEVELOPMENT
+  PAUSED
+  PLANNING
+  DONE
+}
+
+model ProjectCredential {
+  id       String @id @default(uuid())
+  label    String
+  category String @default("general")
+
+  url      String?
+  username String?
+  password String?
+  apiKey   String? @map("api_key")
+  notes    String?
+
+  projectId String  @map("project_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([projectId])
+  @@map("project_credentials")
+}
+
+model ProjectTask {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Int        @default(0)
+  sortOrder   Int        @default(0) @map("sort_order")
+  category    String?
+
+  parentId String?       @map("parent_id")
+  parent   ProjectTask?  @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks ProjectTask[] @relation("TaskSubtasks")
+
+  projectId String  @map("project_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@index([projectId, status])
+  @@index([parentId])
+  @@map("project_tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model ProjectNote {
+  id      String  @id @default(uuid())
+  title   String
+  content String  @db.Text
+  pinned  Boolean @default(false)
+
+  projectId String  @map("project_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([projectId])
+  @@map("project_notes")
+}
+
+model DevModule {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  description String
+  category    ModuleCategory
+  content     String         @db.Text
+  stackCompat Json           @default("[]") @map("stack_compat")
+  icon        String         @default("puzzle")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  steps DevModuleStep[]
+
+  @@index([category])
+  @@map("dev_modules")
+}
+
+enum ModuleCategory {
+  AUTH
+  CRUD
+  PAYMENTS
+  EMAIL
+  FILE_UPLOAD
+  DATABASE
+  DEPLOYMENT
+  TESTING
+  UI_COMPONENT
+  INTEGRATION
+  OTHER
+}
+
+model DevModuleStep {
+  id        String @id @default(uuid())
+  title     String
+  content   String @db.Text
+  sortOrder Int    @default(0) @map("sort_order")
+
+  moduleId String    @map("module_id")
+  module   DevModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([moduleId])
+  @@map("dev_module_steps")
+}
+
+model ProjectIdea {
+  id             String     @id @default(uuid())
+  title          String
+  description    String     @db.Text
+  status         IdeaStatus @default(IDEA)
+  suggestedStack Json       @default("[]") @map("suggested_stack")
+  priority       Int        @default(0)
+  notes          String?    @db.Text
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("project_ideas")
+}
+
+enum IdeaStatus {
+  IDEA
+  EVALUATING
+  APPROVED
+  DISCARDED
+}
+
+model Client {
+  id       String       @id @default(uuid())
+  name     String
+  email    String?
+  phone    String?
+  company  String?
+  status   ClientStatus @default(LEAD)
+  notes    String?      @db.Text
+  avatar   String?
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  projects     ClientProject[]
+  payments     ClientPayment[]
+  paymentPlans PaymentPlan[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("clients")
+}
+
+enum ClientStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+model ClientProject {
+  id String @id @default(uuid())
+
+  clientId String  @map("client_id")
+  client   Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  projectId String  @map("project_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([clientId, projectId])
+  @@index([clientId])
+  @@index([projectId])
+  @@map("client_projects")
+}
+
+model ClientPayment {
+  id          String        @id @default(uuid())
+  amount      Float
+  currency    String        @default("ARS")
+  description String
+  status      PaymentStatus @default(PENDING)
+  paidAt      DateTime?     @map("paid_at")
+
+  clientId String @map("client_id")
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([clientId])
+  @@index([status])
+  @@map("client_payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model PaymentPlan {
+  id            String          @id @default(uuid())
+  title         String
+  description   String?
+  totalAmount   Float           @map("total_amount")
+  currency      String          @default("ARS")
+  paymentMethod String?         @map("payment_method")
+  status        PlanStatus      @default(ACTIVE)
+  notes         String?         @db.Text
+
+  clientId  String  @map("client_id")
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  projectId String? @map("project_id")
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  installments Installment[]
+
+  @@index([clientId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+  @@map("payment_plans")
+}
+
+enum PlanStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Installment {
+  id     String @id @default(uuid())
+  number Int
+  label  String
+  amount Float
+  dueDate  DateTime  @map("due_date")
+  paidAt   DateTime? @map("paid_at")
+  status   PaymentStatus @default(PENDING)
+  notes    String?
+
+  planId String      @map("plan_id")
+  plan   PaymentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([planId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("installments")
+}
