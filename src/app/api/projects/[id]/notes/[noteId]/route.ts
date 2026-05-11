@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { noteSchema } from "@/lib/validations"
+import { authorizeProject } from "@/lib/project-auth"
 
 export async function PUT(
   req: NextRequest,
@@ -12,9 +13,8 @@ export async function PUT(
 
   const { id, noteId } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const existing = await prisma.projectNote.findUnique({ where: { id: noteId } })
   if (!existing || existing.projectId !== id) {
@@ -29,7 +29,14 @@ export async function PUT(
 
   const note = await prisma.projectNote.update({
     where: { id: noteId },
-    data: parsed.data,
+    data: {
+      ...parsed.data,
+      updatedById: session.user.id,
+    },
+    include: {
+      createdBy: { select: { name: true } },
+      updatedBy: { select: { name: true } },
+    },
   })
 
   return Response.json(note)
@@ -44,9 +51,8 @@ export async function DELETE(
 
   const { id, noteId } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const existing = await prisma.projectNote.findUnique({ where: { id: noteId } })
   if (!existing || existing.projectId !== id) {

@@ -18,6 +18,8 @@ interface Note {
   pinned: boolean
   createdAt: string
   updatedAt: string
+  createdBy?: { name: string } | null
+  updatedBy?: { name: string } | null
 }
 
 interface NotesTabProps {
@@ -44,6 +46,15 @@ export function NotesTab({ projectId, notes, onUpdate }: NotesTabProps) {
     await fetch(`/api/projects/${projectId}/notes/${noteId}`, { method: "DELETE" })
     toast.success("Nota eliminada")
     onUpdate()
+  }
+
+  function authorLine(note: Note) {
+    const parts: string[] = []
+    if (note.createdBy) parts.push(`por ${note.createdBy.name}`)
+    if (note.updatedBy && note.updatedBy.name !== note.createdBy?.name) {
+      parts.push(`editado por ${note.updatedBy.name}`)
+    }
+    return parts.length > 0 ? ` · ${parts.join(" · ")}` : ""
   }
 
   return (
@@ -87,7 +98,7 @@ export function NotesTab({ projectId, notes, onUpdate }: NotesTabProps) {
                   {note.content}
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-2">
-                  {formatRelativeDate(note.updatedAt)}
+                  {formatRelativeDate(note.updatedAt)}{authorLine(note)}
                 </p>
               </CardContent>
             </Card>

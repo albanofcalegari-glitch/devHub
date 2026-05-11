@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { taskSchema } from "@/lib/validations"
+import { authorizeProject } from "@/lib/project-auth"
 
 export async function GET(
   req: NextRequest,
@@ -12,9 +13,8 @@ export async function GET(
 
   const { id } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const status = req.nextUrl.searchParams.get("status")
 
@@ -26,6 +26,8 @@ export async function GET(
     },
     include: {
       subtasks: { orderBy: { sortOrder: "asc" } },
+      createdBy: { select: { name: true } },
+      updatedBy: { select: { name: true } },
     },
     orderBy: { sortOrder: "asc" },
   })
@@ -42,9 +44,8 @@ export async function POST(
 
   const { id } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const body = await req.json()
   const parsed = taskSchema.safeParse(body)
@@ -58,6 +59,11 @@ export async function POST(
       ...parsed.data,
       parentId,
       projectId: id,
+      createdById: session.user.id,
+    },
+    include: {
+      createdBy: { select: { name: true } },
+      updatedBy: { select: { name: true } },
     },
   })
 

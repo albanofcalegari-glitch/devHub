@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { credentialSchema } from "@/lib/validations"
+import { authorizeProject } from "@/lib/project-auth"
 
 export async function PUT(
   req: NextRequest,
@@ -12,9 +13,8 @@ export async function PUT(
 
   const { id, credId } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const existing = await prisma.projectCredential.findUnique({ where: { id: credId } })
   if (!existing || existing.projectId !== id) {
@@ -44,9 +44,8 @@ export async function DELETE(
 
   const { id, credId } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const existing = await prisma.projectCredential.findUnique({ where: { id: credId } })
   if (!existing || existing.projectId !== id) {

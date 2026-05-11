@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
 
   const projects = await prisma.project.findMany({
     where: {
-      userId: session.user.id,
+      OR: [
+        { userId: session.user.id },
+        { collaborators: { some: { id: session.user.id } } },
+      ],
       ...(status ? { status: status as any } : {}),
     },
     include: {

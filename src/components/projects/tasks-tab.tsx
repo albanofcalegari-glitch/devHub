@@ -54,6 +54,8 @@ interface Task {
   priority: number
   category?: string | null
   subtasks?: Subtask[]
+  createdBy?: { name: string } | null
+  updatedBy?: { name: string } | null
 }
 
 interface TasksTabProps {
@@ -260,6 +262,11 @@ export function TasksTab({ projectId, tasks, onUpdate }: TasksTabProps) {
                             <span className="flex items-center gap-1 text-[10px] text-muted-foreground ml-auto">
                               <ListChecks className="h-3 w-3" />
                               {subsDone}/{subs.length}
+                            </span>
+                          )}
+                          {(task.updatedBy || task.createdBy) && (
+                            <span className="text-[10px] text-muted-foreground/70 ml-auto">
+                              {task.updatedBy ? task.updatedBy.name : task.createdBy?.name}
                             </span>
                           )}
                         </div>

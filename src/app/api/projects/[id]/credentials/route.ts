@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { credentialSchema } from "@/lib/validations"
+import { authorizeProject } from "@/lib/project-auth"
 
 export async function GET(
   _req: NextRequest,
@@ -12,9 +13,8 @@ export async function GET(
 
   const { id } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const credentials = await prisma.projectCredential.findMany({
     where: { projectId: id },
@@ -33,9 +33,8 @@ export async function POST(
 
   const { id } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const body = await req.json()
   const parsed = credentialSchema.safeParse(body)

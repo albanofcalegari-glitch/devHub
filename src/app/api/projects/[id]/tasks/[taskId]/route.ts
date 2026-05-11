@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { taskSchema } from "@/lib/validations"
+import { authorizeProject } from "@/lib/project-auth"
 
 export async function PUT(
   req: NextRequest,
@@ -12,9 +13,8 @@ export async function PUT(
 
   const { id, taskId } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const existing = await prisma.projectTask.findUnique({ where: { id: taskId } })
   if (!existing || existing.projectId !== id) {
@@ -27,9 +27,11 @@ export async function PUT(
     return Response.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
   }
 
-  const data: any = { ...parsed.data }
+  const data: any = {
+    ...parsed.data,
+    updatedById: session.user.id,
+  }
 
-  // Handle completedAt based on status transitions
   if (parsed.data.status === "DONE" && existing.status !== "DONE") {
     data.completedAt = new Date()
   } else if (parsed.data.status && parsed.data.status !== "DONE" && existing.status === "DONE") {
@@ -39,7 +41,11 @@ export async function PUT(
   const task = await prisma.projectTask.update({
     where: { id: taskId },
     data,
-    include: { subtasks: { orderBy: { sortOrder: "asc" } } },
+    include: {
+      subtasks: { orderBy: { sortOrder: "asc" } },
+      createdBy: { select: { name: true } },
+      updatedBy: { select: { name: true } },
+    },
   })
 
   return Response.json(task)
@@ -54,9 +60,8 @@ export async function DELETE(
 
   const { id, taskId } = await params
 
-  const project = await prisma.project.findUnique({ where: { id } })
+  const project = await authorizeProject(id, session.user.id)
   if (!project) return Response.json({ error: "Proyecto no encontrado" }, { status: 404 })
-  if (project.userId !== session.user.id) return Response.json({ error: "No autorizado" }, { status: 401 })
 
   const existing = await prisma.projectTask.findUnique({ where: { id: taskId } })
   if (!existing || existing.projectId !== id) {
