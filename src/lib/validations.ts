@@ -4,7 +4,7 @@ export const projectSchema = z.object({
   name: z.string().min(1, "Nombre requerido").max(100),
   slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/, "Solo minusculas, numeros y guiones"),
   description: z.string().min(1, "Descripcion requerida").max(500),
-  status: z.enum(["ACTIVE", "IN_DEVELOPMENT", "PAUSED", "PLANNING", "DONE"]),
+  status: z.enum(["ACTIVE", "IN_DEVELOPMENT", "PRODUCTION", "PAUSED", "PLANNING", "DONE"]),
   progress: z.number().int().min(0).max(100),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color hex invalido"),
   icon: z.string().min(1).max(50),

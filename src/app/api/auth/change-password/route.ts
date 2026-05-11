@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "No autorizado" }, { status: 401 })
   }
 
-  const { currentPassword, newPassword } = await req.json()
+  const { currentPassword, newPassword, verify } = await req.json()
 
-  if (!currentPassword || !newPassword || newPassword.length < 6) {
-    return Response.json({ error: "La nueva contrasena debe tener al menos 6 caracteres" }, { status: 400 })
+  if (!currentPassword) {
+    return Response.json({ error: "Contrasena actual requerida" }, { status: 400 })
   }
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
@@ -23,6 +23,14 @@ export async function POST(req: NextRequest) {
   const isValid = await compare(currentPassword, user.password)
   if (!isValid) {
     return Response.json({ error: "Contrasena actual incorrecta" }, { status: 400 })
+  }
+
+  if (verify) {
+    return Response.json({ ok: true })
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    return Response.json({ error: "La nueva contrasena debe tener al menos 6 caracteres" }, { status: 400 })
   }
 
   const hashedPassword = await hash(newPassword, 12)

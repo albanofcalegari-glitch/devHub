@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
+import { Tesseract } from "@/components/brand/tesseract"
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -43,17 +44,7 @@ export function Sidebar({ className }: { className?: string }) {
     >
       <div className="p-6 pb-4">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#7c5cfc] to-[#c084fc]">
-            <svg width="18" height="18" viewBox="0 0 40 40" fill="none">
-              <rect x="6" y="6" width="28" height="28" rx="2" stroke="white" strokeWidth="1.5" fill="none" />
-              <rect x="12" y="12" width="16" height="16" rx="1" stroke="white" strokeWidth="1.5" fill="none" />
-              <line x1="6" y1="6" x2="12" y2="12" stroke="white" strokeWidth="1" opacity="0.7" />
-              <line x1="34" y1="6" x2="28" y2="12" stroke="white" strokeWidth="1" opacity="0.7" />
-              <line x1="6" y1="34" x2="12" y2="28" stroke="white" strokeWidth="1" opacity="0.7" />
-              <line x1="34" y1="34" x2="28" y2="28" stroke="white" strokeWidth="1" opacity="0.7" />
-              <circle cx="20" cy="20" r="2" fill="white" opacity="0.9" />
-            </svg>
-          </div>
+          <Tesseract size={48} />
           <div>
             <span className="text-lg font-bold font-[family-name:var(--font-heading)] bg-gradient-to-r from-[#7c5cfc] to-[#c084fc] bg-clip-text text-transparent">
               DevHub

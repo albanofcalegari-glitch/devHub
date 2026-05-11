@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { Tesseract } from "@/components/brand/tesseract"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -44,16 +45,8 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-sm relative z-10 border-border/50 shadow-xl">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#7c5cfc] to-[#c084fc]">
-            <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="6" width="28" height="28" rx="2" stroke="white" strokeWidth="1.5" fill="none" />
-              <rect x="12" y="12" width="16" height="16" rx="1" stroke="white" strokeWidth="1.5" fill="none" />
-              <line x1="6" y1="6" x2="12" y2="12" stroke="white" strokeWidth="1" opacity="0.7" />
-              <line x1="34" y1="6" x2="28" y2="12" stroke="white" strokeWidth="1" opacity="0.7" />
-              <line x1="6" y1="34" x2="12" y2="28" stroke="white" strokeWidth="1" opacity="0.7" />
-              <line x1="34" y1="34" x2="28" y2="28" stroke="white" strokeWidth="1" opacity="0.7" />
-              <circle cx="20" cy="20" r="2" fill="white" opacity="0.9" />
-            </svg>
+          <div className="mx-auto mb-2">
+            <Tesseract size={100} />
           </div>
           <CardTitle className="text-2xl font-[family-name:var(--font-heading)] bg-gradient-to-r from-[#7c5cfc] to-[#c084fc] bg-clip-text text-transparent">
             DevHub

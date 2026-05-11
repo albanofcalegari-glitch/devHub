@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
+import { Tesseract } from "@/components/brand/tesseract"
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -32,17 +33,7 @@ export function MobileHeader({ className }: { className?: string }) {
   return (
     <header className={cn("flex items-center justify-between p-4 border-b border-border", className)}>
       <Link href="/" className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7c5cfc] to-[#c084fc]">
-          <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
-            <rect x="6" y="6" width="28" height="28" rx="2" stroke="white" strokeWidth="1.5" fill="none" />
-            <rect x="12" y="12" width="16" height="16" rx="1" stroke="white" strokeWidth="1.5" fill="none" />
-            <line x1="6" y1="6" x2="12" y2="12" stroke="white" strokeWidth="1" opacity="0.7" />
-            <line x1="34" y1="6" x2="28" y2="12" stroke="white" strokeWidth="1" opacity="0.7" />
-            <line x1="6" y1="34" x2="12" y2="28" stroke="white" strokeWidth="1" opacity="0.7" />
-            <line x1="34" y1="34" x2="28" y2="28" stroke="white" strokeWidth="1" opacity="0.7" />
-            <circle cx="20" cy="20" r="2" fill="white" opacity="0.9" />
-          </svg>
-        </div>
+        <Tesseract size={42} />
         <span className="text-lg font-bold font-[family-name:var(--font-heading)] bg-gradient-to-r from-[#7c5cfc] to-[#c084fc] bg-clip-text text-transparent">
           DevHub
         </span>
@@ -54,10 +45,16 @@ export function MobileHeader({ className }: { className?: string }) {
         <SheetContent side="left" className="w-64 p-0">
           <SheetTitle className="sr-only">Menu de navegacion</SheetTitle>
           <div className="flex flex-col h-full">
-            <div className="p-6 pb-4 border-b border-border">
-              <span className="text-lg font-bold font-[family-name:var(--font-heading)] bg-gradient-to-r from-[#7c5cfc] to-[#c084fc] bg-clip-text text-transparent">
-                DevHub
-              </span>
+            <div className="p-6 pb-4 border-b border-border flex items-center gap-3">
+              <Tesseract size={42} />
+              <div>
+                <span className="text-lg font-bold font-[family-name:var(--font-heading)] bg-gradient-to-r from-[#7c5cfc] to-[#c084fc] bg-clip-text text-transparent">
+                  DevHub
+                </span>
+                <p className="text-[10px] text-muted-foreground tracking-wider uppercase">
+                  Qngine
+                </p>
+              </div>
             </div>
             <nav className="flex-1 px-3 py-2 space-y-1">
               {navItems.map((item) => {

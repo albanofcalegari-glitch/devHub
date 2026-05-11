@@ -21,7 +21,22 @@ model User {
   clients      Client[]
   paymentPlans PaymentPlan[]
 
+  otps Otp[]
+
   @@map("users")
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  code      String
+  used      Boolean  @default(false)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("otps")
 }
 
 model Project {
@@ -62,6 +77,7 @@ model Project {
 enum ProjectStatus {
   ACTIVE
   IN_DEVELOPMENT
+  PRODUCTION
   PAUSED
   PLANNING
   DONE

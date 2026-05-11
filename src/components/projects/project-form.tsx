@@ -115,6 +115,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSaved, project }: Proj
                 <SelectContent>
                   <SelectItem value="ACTIVE">Activo</SelectItem>
                   <SelectItem value="IN_DEVELOPMENT">En desarrollo</SelectItem>
+                  <SelectItem value="PRODUCTION">Producción</SelectItem>
                   <SelectItem value="PAUSED">Pausado</SelectItem>
                   <SelectItem value="PLANNING">Planificando</SelectItem>
                   <SelectItem value="DONE">Terminado</SelectItem>
